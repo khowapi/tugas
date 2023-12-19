@@ -1,0 +1,346 @@
+'''
+TUGAS AKHIR PRAKTIKUM ALGORITMA DAN PEMROGRAMAN 2023
+KELOMPOK 18 - Hubungan antara Luas Penampang dengan Kecepatan dan Tekanan Fluida
+> Khoirunnisa Wahdah Putri (08)
+> Muhammad Ihsan Putra Pratama Mulyana (24)
+> Dinda Citra Lailanurrachmah (28)
+'''
+
+# Mengambil paket class yang dibutuhkan dari library python
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import numpy as np
+import csv
+
+'''Fenomena Fisika'''
+print("\n{}\n||{}||\n{}".format("="*80,"[ FENOMENA FISIKA ]".center(76),"="*80))
+gambar = plt.imread("FENOMENA FISIKA KEL.18.png")
+plt.imshow(gambar)
+ax = plt.gca()
+ax.axis('off')
+plt.show()
+
+'''Percepatan gravitasi '''
+g = 9.81 # m/s^2
+
+'''Massa jenis udara Umum'''
+Pa = 1.2 # kg/m^3
+
+'''Tandon fluida'''
+print("\n{}\n||{}||\n{}".format("="*80,"[ TANDON FLUIDA ]".center(76),"="*80))
+# Input manual atau memakai data yang sudah ada
+def tandon():
+    while True:
+        Q = input("\nApakah anda ingin menginput sendiri parameter dari tandon air (ya/tidak)?\nJawab : ")
+        if Q == "ya":
+            # Penginputan parameter tandon
+            def input_tandon():
+                global V,H,h
+                while True:
+                    V = round(float(input("\nMasukkan volume tandon (>=20 liter) : ")),3)
+                    H = round(float(input("Masukkan tinggi tandon (>=50 cm) : ")),3)
+                    h = round(float(input("Masukkan letak tandon dari tanah (>= %.3f cm) : "%(H/5))),3)
+                    try:
+                        if V>=50 and H>=50 and h>=round(H/5,3):
+                            print("\n> Data diperbaharui...")
+                            break
+                        elif V<50 and H<50 and h<round(H/5,3):
+                            print("\n> [ ERROR... Tolong masukkan semua nilai > 50!!! ]")
+                            continue
+                    except ValueError:
+                        print("\n> [ ERROR...Tolong input bilangan desimal atau bulat!!! ]")
+                        continue
+
+                # Mengganti data
+                while True:
+                    Q = input("\nApakah anda ingin mengganti data (ya/tidak)?\nJawab : ")
+                    if Q == "ya":
+                        input_tandon()
+                        break
+                    elif Q == "tidak":
+                        print("\n> Data diperbaharui...")
+                        break
+                    else:
+                        print("\n> [ ERROR... Tolong input ya atau tidak!!! ]")
+                        continue
+                return V,H,h,Q
+            input_tandon()
+            break
+        elif Q == "tidak":
+            # Data parameter tandon
+            def data_tandon():
+                global V,H,h
+                V = 2000 # liter
+                H = 156 # cm
+                h = 50 # cm
+                print("\n\tVolume tandon : {} liter\n\tTinggi tandon : {} cm\n\tLetak tandon dari tanah : {} cm\n\n> Data diperbaharui...".format(V,H,h))
+                return V,H,h
+            data_tandon()
+            break
+        else:
+            print("\n> [ ERROR... Tolong input ya atau tidak!!! ]")
+            continue
+    return Q
+tandon() # Memanggil opsi tandon
+
+'''Massa Jenis Fluida'''
+print("\n{}\n||{}||\n{}".format("="*80,"[ MASSA JENIS FLUIDA ]".center(76),"="*80))
+# Pilihan fluida
+def rho_fluida():
+    global rho
+    while True:
+        Q = input("\nApakah anda ingin mengisi tandon dengan air (ya/tidak)?\nJawab : ")
+        if Q == "ya":
+            rho = float(1000) # kg/m^3
+            print("\n\tMasa jenis air :","{:,} kg/m^3".format(rho))
+            print("\n> Data diperbaharui...")
+            break
+        elif Q == "tidak":
+            # Mengecek fluida
+            def cek_fluida():
+                global rho
+                while True:
+                    rho = round(float(input("\n\tMasukkan massa jenis fluida (kg/m^3) : ")),3)
+                    try:
+                        if rho > Pa :
+                            print("\n> Data diperbaharui...")
+                            break
+                        elif rho <= Pa :
+                            print("\n> [ ERROR... Fluida tersebut akan melayang dikarenakan densitasnya <= densitas udara!!! ]")
+                            cek_fluida()
+                            continue
+                    except ValueError:
+                        print("\n> [ ERROR... Tolong input bilangan desimal atau bulat!!! ]")
+                        continue
+
+                # Mengganti data
+                print("\nApakah anda ingin mengganti data (ya/tidak)?")
+                while True:
+                    Q = input("Jawab : ")
+                    if Q == "ya":
+                        cek_fluida()
+                        break
+                    elif Q == "tidak":
+                        print("\n> Data diperbaharui...")
+                        break
+                    else:
+                        print("\n> [ ERROR... Tolong input ya atau tidak!!! ]")
+                        continue
+                return rho
+            cek_fluida()
+            break
+        else:
+            print("\n> [ ERROR... Tolong input ya atau tidak!!! ]")
+            continue
+    return rho, Q
+rho_fluida() # Memanggil opsi fluida
+
+'''Pipa Penampang 1'''
+print("\n{}\n||{}||\n{}".format("="*80,"[ PIPA PENAMPANG 1 ]".center(76),"="*80))
+# Input manual atau memakai data yang sudah ada
+def pipa1():
+    global r1
+    while True:
+        Q = input("\nApakah anda ingin menginput sendiri parameter dari pipa 1 (ya/tidak)?\nJawab : ")
+        if Q == "ya":
+            # Penginputan parameter Pipa 1
+            def input_pipa1():
+                global r1
+                while True:
+                    r1 = round(float(input("\nMasukkan jari-jari pipa 1 (> 0 cm) : ")),3)
+                    try:
+                        if r1 > 0:
+                            print("\nData diperbaharui...")
+                            break
+                        elif r1 <= 0:
+                            print("\n> [ ERROR... Tolong masukkan jari-jari pipa 1 lebih dari 0 cm!!! ]")
+                            continue
+                    except ValueError:
+                        print('\n> [ ERROR...Tolong input bilangan desimal atau bulat!!! ]')
+                        continue
+
+                # Mengganti data
+                while True:
+                    Q = input("\nApakah anda ingin mengganti data (ya/tidak)?\nJawab : ")
+                    if Q == "ya":
+                        input_pipa1()
+                        break
+                    elif Q == "tidak":
+                        print("\n> Data diperbaharui...")
+                        break
+                    else:
+                        print("> [ ERROR... Tolong input ya atau tidak!!! ]")
+                        continue
+                return r1,Q
+            input_pipa1()
+            break
+        elif Q == "tidak":
+            # Data parameter pipa 1
+            def data_pipa1():
+                global r1
+                r1 = 10 # cm
+                print("\n\tJari-jari pipa 1 :",r1,"cm\n\n> Data diperbaharui...")
+                return r1
+            data_pipa1()
+            break
+        else:
+            print("\n> [ ERROR... Tolong input ya atau tidak!!! ]")
+            continue
+    return Q
+pipa1() # Memanggil opsi pipa 1
+
+'''Pipa Penampang 2'''
+print("\n{}\n||{}||\n{}".format("="*80,"[ PIPA PENAMPANG 2 ]".center(76),"="*80))
+# Pilihan acak atau file
+def pipa2():
+    global r2
+    while True:
+        Q = input("\nApakah anda ingin mengambil jari-jari pipa 2 dari file csv (ya/tidak)?\nJawab : ")
+        if Q == "ya":
+            # Jari-jari pipa 2 - file csv
+            def csv_r2():
+                global r2
+                with open("DataPipa2.csv",'r') as file_pipa2:
+                    r2 = [kolom[0] for kolom in csv.reader(file_pipa2)]
+                print(r2)
+                r2.remove(r2[0]) # Menghilangkan header kolom
+                for i in range(len(r2)):
+                    r2[i] = round(float(r2[i],3))
+                return r2
+            csv_r2()
+            break
+        elif Q == "tidak":
+            # Jari-jari pipa 2 - acak
+            def acak_r2():
+                global r2
+                while True:
+                    n = int(input("\nMasukkan berapa banyak data jari-jari yang diinginkan : "))
+                    try:
+                        print("\n> Data diperbaharui...")
+                        break
+                    except ValueError:
+                        print("\n> [ ERROR...Tolong masukkan bilangan bulat!!! ]")
+                        continue
+                r2 = []
+                for i in range(0,n):
+                    r2.append(np.random.randint(2,r1+h)+np.random.ranf())
+                    round(r2[i],3)
+                return r2,i,n
+            acak_r2()
+            break
+        else:
+            print("\n> [ERROR... Tolong input ya atau tidak!!!]")
+            continue
+
+    # Mengurutkan data r2
+    r2 = np.sort(r2)
+    print("\nJari-jari pipa 2 :",", ".join(f"{round(i,3)} cm" for i in r2))
+    print("\n> Data diperbaharui...")
+
+    # Ulangi metode
+    while True:
+        Q = input("\nApakah anda ingin mengulangi metode (ya/tidak)?\nJawab : ")
+        if Q == "ya":
+            pipa2()
+            break
+        elif Q == "tidak":
+            print("\n> Data diperbaharui...")
+            break
+        else:
+            print("> [ ERROR... Tolong input ya atau tidak!!! ]")
+            continue
+    return r2,Q
+pipa2() # Memanggil opsi pipa 2
+
+'''Perhitungan'''
+print("\n{}\n||{}||\n{}".format("="*80,"[ PERHITUNGAN ]".center(76),"="*80))
+def hitung():
+    global A1,H1,P1,v1,A2,v2,P2
+
+    # Luas lubang pipa 1 (m^2)
+    A1 = round(np.pi*(r1/100)**2,3)
+    print("\nLuas lubang pipa 1 :",A1,"m^2")
+    # Kedalamaan lubang pipa 1 yang terhubung ke tandon (m)
+    H1 = (H - 2*r1)/100
+    # Tekanan Pipa 1 (Pa)
+    P1 = round(rho*g*H,3)
+    print("Tekanan pada Pipa 1 :","{:,} Pa".format(P1))
+    # Kecepatan fluida di pipa 1 (m/s)
+    v1 = round((2*g*H1)**0.5,3)
+    print("Kecepatan fluida di pipa 1 :","{:,} m/s".format(v1))
+
+    # Luas lubang pipa 2 (m^2)
+    A2 = []
+    for i in range (len(r2)):
+        A2.append(round(np.pi*(r2[i]/100)**2,3))
+    print("\nLuas lubang pipa 2 :",", ".join(f"{i:,} m^2" for i in A2))
+    # Kecepatan fluida di pipa 2 menurut hukum kontinuitas (m/s)
+    v2 = []
+    for i in range (len(A2)):
+        v2.append(round(A1*v1/A2[i],3))
+    print("\nKecepatan fluida di pipa 2 :",", ".join(f"{i:,} m/s" for i in v2))
+    # Tekanan Pipa 2 (Pa)
+    P2 = []
+    for i in range (len(v2)):
+        dr = np.abs(r1-r2[i])
+        if r2[i] > r1:
+            P2.append(round(P1 + 0.5*rho*(v1**2 - v2[i]**2) + rho*g*dr/100,3))
+        elif r2[i] < r1:
+            P2.append(round(P1 + 0.5*rho*(v1**2 - v2[i]**2) - rho*g*dr/100,3))
+        else:
+            P2.append(round(P1 + 0.5*rho*(v1**2 - v2[i]**2),3))
+    print("\nTekanan pada pipa 2 :",", ".join(f"{i:,} Pa" for i in P2))
+    return A1,H1,P1,v1,A2,v2,P2
+hitung() # Melakukan perhitungan
+
+'''Save data pada CSV'''
+print("\n{}\n||{}||\n{}".format("="*80,"[ SAVE HASIL PERHITUNGAN ]".center(76),"="*80))
+def save_hasil():
+    while True:
+        Q = input("\nApakah ingin menyimpan hasil perhitungan ke file (ya/tidak)?\nJawab : ")
+        if Q == "ya":
+            with open("DataPipa2.csv",'w') as file_pipa2:
+                keterangan = ['r2', 'A2', 'v2', 'P2']
+                input_data = csv.writer(file_pipa2, delimiter='\t')
+                input_data.writerow(keterangan)
+                for i in range(len(r2)):
+                    input_data.writerow([str(r2[i]),str(A2[i]),str(v2[i]),str(P2[i])])
+            print('''
+                \nHasil perhitungan berhasil disimpan...
+                Silahkan bisa langsung dicek grafiknya...
+                ''')
+            break
+        elif Q == "tidak":
+            print("\nSilahkan bisa langsung dicek grafiknya...")
+            break
+        else:
+            print("\n> [ ERROR... Tolong input ya atau tidak!!! ]")
+            continue
+    return Q
+save_hasil() # Menyimpan hasil perhitungan ke file
+
+'''Plotting Grafik'''
+print("\n{}\n||{}||\n{}".format("="*80,"[ PLOT GRAFIK ]".center(76),"="*80))
+
+# Subplot grafik
+fig, (ax1,ax2) = plt.subplots(nrows=2,ncols=1)
+
+# Grafik luas pipa terhadap kecepatan fluida
+ax1.plot(A2,v2,'o--r')
+ax1.set_title("Grafik Luas Penampang terhadap Kecepatan Fluida")
+ax1.set_xlabel("Luas Penampang ($m^2$)")
+ax1.set_ylabel("Kecepatan Fluida ($m/s$)")
+ax1.grid()
+
+# Grafik luas pipa terhadap tekanan fluida
+ax2.plot(A2,P2,'o--b')
+ax2.set_title("Grafik Luas Penampang terhadap Tekanan Fluida")
+ax2.set_xlabel("Luas Penampang ($m^2$)")
+ax2.set_ylabel("Tekanan Fluida ($Pa$)")
+ax2.grid()
+
+# Kostumisasi window grafik
+plt.get_current_fig_manager().set_window_title("Kel.18 - Hubungan antara Luas Penampang dengan Kecepatan dan Tekanan Fluida")
+plt.suptitle("Hubungan antara Luas Penampang dengan Kecepatan dan Tekanan Fluida\n ")
+fig.tight_layout()
+plt.show()
