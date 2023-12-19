@@ -8,7 +8,6 @@ KELOMPOK 18 - Hubungan antara Luas Penampang dengan Kecepatan dan Tekanan Fluida
 
 # Mengambil paket class yang dibutuhkan dari library python
 import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 import numpy as np
 import csv
 
@@ -30,6 +29,7 @@ Pa = 1.2 # kg/m^3
 print("\n{}\n||{}||\n{}".format("="*80,"[ TANDON FLUIDA ]".center(76),"="*80))
 # Input manual atau memakai data yang sudah ada
 def tandon():
+    global V,H,h
     while True:
         Q = input("\nApakah anda ingin menginput sendiri parameter dari tandon air (ya/tidak)?\nJawab : ")
         if Q == "ya":
@@ -68,19 +68,15 @@ def tandon():
             break
         elif Q == "tidak":
             # Data parameter tandon
-            def data_tandon():
-                global V,H,h
-                V = 2000 # liter
-                H = 156 # cm
-                h = 50 # cm
-                print("\n\tVolume tandon : {} liter\n\tTinggi tandon : {} cm\n\tLetak tandon dari tanah : {} cm\n\n> Data diperbaharui...".format(V,H,h))
-                return V,H,h
-            data_tandon()
+            V = 2000 # liter
+            H = 156 # cm
+            h = 50 # cm
+            print("\n\tVolume tandon : {} liter\n\tTinggi tandon : {} cm\n\tLetak tandon dari tanah : {} cm\n\n> Data diperbaharui...".format(V,H,h))
             break
         else:
             print("\n> [ ERROR... Tolong input ya atau tidak!!! ]")
             continue
-    return Q
+    return V,H,h,Q
 tandon() # Memanggil opsi tandon
 
 '''Massa Jenis Fluida'''
@@ -176,12 +172,8 @@ def pipa1():
             break
         elif Q == "tidak":
             # Data parameter pipa 1
-            def data_pipa1():
-                global r1
-                r1 = 10 # cm
-                print("\n\tJari-jari pipa 1 :",r1,"cm\n\n> Data diperbaharui...")
-                return r1
-            data_pipa1()
+            r1 = 10 # cm
+            print("\n\tJari-jari pipa 1 :",r1,"cm\n\n> Data diperbaharui...")
             break
         else:
             print("\n> [ ERROR... Tolong input ya atau tidak!!! ]")
@@ -205,7 +197,7 @@ def pipa2():
                 print(r2)
                 r2.remove(r2[0]) # Menghilangkan header kolom
                 for i in range(len(r2)):
-                    r2[i] = round(float(r2[i],3))
+                    r2[i] = round(float(r2[i]),3)
                 return r2
             csv_r2()
             break
@@ -223,9 +215,8 @@ def pipa2():
                         continue
                 r2 = []
                 for i in range(0,n):
-                    r2.append(np.random.randint(2,r1+h)+np.random.ranf())
-                    round(r2[i],3)
-                return r2,i,n
+                    r2.append(round(np.random.randint(2,r1+h)+np.random.ranf(),3))
+                return r2,n
             acak_r2()
             break
         else:
@@ -234,7 +225,7 @@ def pipa2():
 
     # Mengurutkan data r2
     r2 = np.sort(r2)
-    print("\nJari-jari pipa 2 :",", ".join(f"{round(i,3)} cm" for i in r2))
+    print("\nJari-jari pipa 2 :",", ".join(f"{i} cm" for i in r2))
     print("\n> Data diperbaharui...")
 
     # Ulangi metode
@@ -263,7 +254,7 @@ def hitung():
     # Kedalamaan lubang pipa 1 yang terhubung ke tandon (m)
     H1 = (H - 2*r1)/100
     # Tekanan Pipa 1 (Pa)
-    P1 = round(rho*g*H,3)
+    P1 = round(rho*g*H1,3)
     print("Tekanan pada Pipa 1 :","{:,} Pa".format(P1))
     # Kecepatan fluida di pipa 1 (m/s)
     v1 = round((2*g*H1)**0.5,3)
@@ -282,13 +273,8 @@ def hitung():
     # Tekanan Pipa 2 (Pa)
     P2 = []
     for i in range (len(v2)):
-        dr = np.abs(r1-r2[i])
-        if r2[i] > r1:
-            P2.append(round(P1 + 0.5*rho*(v1**2 - v2[i]**2) + rho*g*dr/100,3))
-        elif r2[i] < r1:
-            P2.append(round(P1 + 0.5*rho*(v1**2 - v2[i]**2) - rho*g*dr/100,3))
-        else:
-            P2.append(round(P1 + 0.5*rho*(v1**2 - v2[i]**2),3))
+        dr = r1-r2[i]
+        P2.append(round(P1 + 0.5*rho*(v1**2 - v2[i]**2) + rho*g*dr/100,3))
     print("\nTekanan pada pipa 2 :",", ".join(f"{i:,} Pa" for i in P2))
     return A1,H1,P1,v1,A2,v2,P2
 hitung() # Melakukan perhitungan
@@ -305,10 +291,7 @@ def save_hasil():
                 input_data.writerow(keterangan)
                 for i in range(len(r2)):
                     input_data.writerow([str(r2[i]),str(A2[i]),str(v2[i]),str(P2[i])])
-            print('''
-                \nHasil perhitungan berhasil disimpan...
-                Silahkan bisa langsung dicek grafiknya...
-                ''')
+            print("\nHasil perhitungan berhasil disimpan...\nSilahkan bisa langsung dicek grafiknya...")
             break
         elif Q == "tidak":
             print("\nSilahkan bisa langsung dicek grafiknya...")
